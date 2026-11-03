@@ -15,7 +15,10 @@ class App extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     return MaterialApp(
       title: 'App 模板',
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
+      theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.blue,
+          fontFamily: 'Noto Sans SC'),
       debugShowCheckedModeBanner: false,
       initialRoute: auth.isLoggedIn ? Routes.home : Routes.login,
       routes: {

@@ -22,3 +22,15 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # 本地打包中文字体（Noto Sans SC，OFL 开源协议）。
+  # 关键：覆盖 Roboto 家族后，Flutter Web (CanvasKit) 不再从
+  # fonts.gstatic.com 联网下载 Roboto/NotoSansSC —— 解决国内
+  # 网络下 Web 版文字渲染空白的问题；原生端不受影响。
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.ttf
+    - family: Noto Sans SC
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.ttf
