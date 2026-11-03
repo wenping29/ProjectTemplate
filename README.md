@@ -84,6 +84,12 @@ cd build && bash run.sh dev          # 建库/建表/索引/种子（含 admin �
 
 > 也可手动逐条执行 `DB/build/` 下的 `00_init.sql → 01_schema.sql → 02_indexes.sql → 03_seed.sql → 04_seed_admin.sql`。
 
+|姓名|权限|描述|
+|---|---|---|
+|app_rw|	read-write（读写账号）	|CONNECT + USAGE/CREATE on schema public + 所有表的 SELECT/INSERT/UPDATE/DELETE	应用主连接账号，承担全部增删改查	Server/Server.Api/appsettings.json 连接串、DB/config/database.yml(dev/prod)、import/、backup/、sync/ 脚本默认用户|
+|app_ro	|read-only（只读账号）|	仅 SELECT（只读）|
+
+
 ### 2. 服务端 (C#)
 ```bash
 cd Server
