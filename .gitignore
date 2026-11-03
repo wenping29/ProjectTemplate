@@ -54,3 +54,11 @@ logs/
 /Admin/package-lock.json
 /Web/package-lock.json
 /Server/Server.Api/appsettings.Development.json
+/App/android/
+/App/ios/
+/App/build/
+/App/macos/
+/App/web/
+/App/windows/
+/App/linux/
+/App/test/
