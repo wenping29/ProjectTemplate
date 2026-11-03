@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'config/app_config.dart';
-import 'models/user.dart';
-import 'services/api_service.dart';
+import '../config/app_config.dart';
+import '../models/user.dart';
+import 'api_service.dart';
 
 class AuthService {
   final ApiService _api;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'models/user.dart';
-import 'services/storage_service.dart';
-import 'services/auth_service.dart';
+import '../models/user.dart';
+import '../services/storage_service.dart';
+import '../services/auth_service.dart';
 
 /// 鉴权与账号状态（含多账号切换 / 注销）。
 class AuthProvider extends ChangeNotifier {

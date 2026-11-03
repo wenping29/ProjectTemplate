@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'config/app_config.dart';
-import 'services/storage_service.dart';
+import '../config/app_config.dart';
+import 'storage_service.dart';
 
 class ApiService {
   final Dio dio;

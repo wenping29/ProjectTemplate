@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'models/menu_item.dart';
-import 'pages/home_page.dart';
-import 'pages/profile_page.dart';
+import '../models/menu_item.dart';
+import '../pages/home_page.dart';
+import '../pages/profile_page.dart';
 
 /// 主框架：包含可配置的底部菜单（底部菜单配置）。
 /// 实际项目可在 initState 中请求 `GET /api/menus/tree`，由服务端决定展示哪些 Tab。

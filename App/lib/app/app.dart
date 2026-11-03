@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'app/routes.dart';
-import 'providers/auth_provider.dart';
-import 'pages/login_page.dart';
-import 'pages/register_page.dart';
-import 'pages/edit_profile_page.dart';
-import 'widgets/main_shell.dart';
+import 'routes.dart';
+import '../providers/auth_provider.dart';
+import '../pages/login_page.dart';
+import '../pages/register_page.dart';
+import '../pages/edit_profile_page.dart';
+import '../widgets/main_shell.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
