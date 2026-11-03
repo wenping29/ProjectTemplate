@@ -68,6 +68,9 @@ cd sync && bash sync.sh test prod
 
 ## DBeaver / GUI 一键导入
 
+app_rw	read-write（读写账号）	CONNECT + USAGE/CREATE on schema public + 所有表的 SELECT/INSERT/UPDATE/DELETE	应用主连接账号，承担全部增删改查	Server/Server.Api/appsettings.json 连接串、DB/config/database.yml(dev/prod)、import/、backup/、sync/ 脚本默认用户
+app_ro	read-only（只读账号）	仅 SELECT（只读）
+
 不想用命令行？`dbeaver/app_db_init.sql` 是一个**自包含、幂等**的单文件脚本，可在 DBeaver（或其他 SQL 客户端）中直接打开执行：
 
 1. （可选）在 `postgres` 连接上取消注释并执行文件末尾「附录A：建库与角色」来建库/建角色；
