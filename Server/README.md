@@ -40,6 +40,8 @@ dotnet run --project Server.Api     # https://localhost:5001 （Swagger 在 /swa
 | 用户 | GET/POST | `/api/users` | 用户列表(支持 q 搜索) / 新建 |
 | 用户 | GET/PUT/DELETE | `/api/users/{id}` | 查询/更新/删除(软删) |
 | 用户 | PUT | `/api/users/me/profile` | 修改个人信息（需登录） |
+| 用户 | POST | `/api/users/me/avatar` | 上传头像（multipart，返回 URL）— **待实现** |
+| 用户 | DELETE | `/api/users/me` | 账号注销（停用当前账号）— **待实现** |
 | 菜单 | GET/POST | `/api/menus` | 菜单列表 / 新建 |
 | 菜单 | GET | `/api/menus/tree` | 树形菜单（后台树 / App 底部菜单） |
 | 菜单 | GET/PUT/DELETE | `/api/menus/{id}` | 查询/更新/删除 |
@@ -54,3 +56,11 @@ dotnet run --project Server.Api     # https://localhost:5001 （Swagger 在 /swa
 - 密码：BCrypt 哈希，与 `DB/build/03_seed.sql` 中 `pgcrypto` 生成的哈希兼容。
 - 时间：`timestamptz` 以 UTC 存储，由数据库触发器维护 `updated_at`。
 - 软删除：用户/商品通过 `deleted_at` 标记。
+
+## 已知限制 / TODO
+
+- **以下两个端点尚未实现**（App 的「上传头像」「账号注销」功能依赖它们，App 端已写好调用代码）：
+  - `POST /api/users/me/avatar`：接收 `multipart/form-data` 的 `file`，保存后返回头像 URL。
+  - `DELETE /api/users/me`：停用/删除当前登录账号（建议软删并清理 token）。
+  - 实现参考：`UsersController.UpdateProfileAsync` + `IUserService`，`CurrentUserId` 已在基类提供。
+- 文件上传未引入 `IFormFile` / 本地存储 / 对象存储，需按部署环境补充（如 MinIO / S3）。

@@ -78,11 +78,11 @@ DB/
 ### 1. 数据库 (PostgreSQL)
 ```bash
 cd DB
-psql -U postgres -f 00_init.sql          # 建库、扩展、角色
-psql -U postgres -d app_db -f 01_schema.sql
-psql -U postgres -d app_db -f 02_indexes.sql
-psql -U postgres -d app_db -f 03_seed.sql
+cp config/.env.example config/.env   # 按需填写连接信息（或导出 DB_HOST/DB_USER 等环境变量）
+cd build && bash run.sh dev          # 建库/建表/索引/种子（含 admin 账号），共 5 个 SQL 文件
 ```
+
+> 也可手动逐条执行 `DB/build/` 下的 `00_init.sql → 01_schema.sql → 02_indexes.sql → 03_seed.sql → 04_seed_admin.sql`。
 
 ### 2. 服务端 (C#)
 ```bash
@@ -113,6 +113,15 @@ flutter create --project-name app . --org com.example
 flutter pub get
 flutter run
 ```
+
+## 已知限制与后续待补 (TODO)
+
+- **服务端待实现接口（供 App 使用）**：
+  - `POST /api/users/me/avatar` —— 上传头像（multipart/form-data，返回头像 URL）。App 端 `AuthService.uploadAvatar` 已就绪，未实现前调用会 404。
+  - `DELETE /api/users/me` —— 账号注销（停用/删除当前登录账号）。App 端 `AuthService.deactivateAccount` 已就绪。
+  - 实现位置：`Server/Server.Api/Controllers/UsersController.cs`，可参考 `UpdateProfileAsync` 复用 `IUserService` 与 `CurrentUserId`。
+- **移动端 App**：本机未安装 Flutter SDK，模板为手写骨架；首次使用需先 `cd App && flutter create --project-name app . --org com.example` 生成原生工程，再 `flutter pub get && flutter run`。
+- **数据库脚本**：SQL 已按 PostgreSQL 方言编写，但未连库执行；`run.sh` / 各 `.sh` 依赖本地 `psql` 与可用的 PostgreSQL 实例。
 
 ## 目录说明
 - `Admin/`：React 后台管理（Ant Design + React Router + Axios + Zustand）。

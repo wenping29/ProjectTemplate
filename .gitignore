@@ -50,3 +50,7 @@ secrets.json
 # ============ Logs ============
 logs/
 *.log
+
+/Admin/package-lock.json
+/Web/package-lock.json
+/Server/Server.Api/appsettings.Development.json

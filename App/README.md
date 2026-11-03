@@ -41,9 +41,12 @@ flutter run
 | 首页 | `pages/home_page.dart` |
 | 底部菜单配置 | `widgets/main_shell.dart`（默认两项；可由 `GET /api/menus/tree` 下发覆盖） |
 | 我的页面 | `pages/profile_page.dart` |
-| 个人信息修改 / 上传头像 | `pages/edit_profile_page.dart` + `AuthProvider.updateProfile/uploadAvatar` |
+| 个人信息修改 | `pages/edit_profile_page.dart` + `AuthProvider.updateProfile` |
+| 上传头像 | `AuthProvider.uploadAvatar` → 调 `POST /api/users/me/avatar`（**服务端待实现**） |
 | 账号切换 | `ProfilePage` 底部弹窗 + `AuthProvider.switchTo`（多账号存于 shared_preferences） |
-| 账号注销 | `AuthProvider.deactivate`（调 `DELETE /api/users/me`） |
+| 账号注销 | `AuthProvider.deactivate` → 调 `DELETE /api/users/me`（**服务端待实现**） |
 | 账户退出 | `AuthProvider.logout` |
 
-> 说明：上传头像依赖服务端 `POST /api/users/me/avatar` 接口；账号注销依赖 `DELETE /api/users/me`，可在 Server 中按需在 `UsersController` 增加对应实现。
+> ⚠️ **待实现依赖**：移动端「上传头像」「账号注销」的调用代码已就绪（`AuthService.uploadAvatar` / `deactivateAccount`），
+> 但服务端 `POST /api/users/me/avatar` 与 `DELETE /api/users/me` 尚未实现，需在 `Server/Server.Api/Controllers/UsersController.cs` 中补充。
+> 在此之前，这两项调用会返回 404。

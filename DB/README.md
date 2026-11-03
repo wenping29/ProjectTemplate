@@ -3,6 +3,17 @@
 本目录不止是「建表脚本」，而是一个覆盖数据库全生命周期的运维工具箱，对应需求：
 **数据库配置 / 数据库搭建 / 数据导入 / 数据库备份 / 数据库迁移 / 数据库同步**。
 
+## 前置依赖
+
+脚本依赖 **PostgreSQL 客户端**（`psql` / `pg_dump`）和 **一个正在运行的 PostgreSQL 服务**（默认端口 5432）。
+
+- 客户端定位顺序：`$PSQL` / `$PG_DUMP` 环境变量 → 系统 PATH → Windows 默认安装路径 `C:\Program Files\PostgreSQL\<版本>\bin`。
+- 若都找不到，脚本会打印可操作指引后退出，不会再出现 `psql: command not found` 这类裸错误。
+- 没有本地 PostgreSQL 时，可用 Docker 临时起一个：
+  ```bash
+  docker run -d --name app_pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16
+  ```
+
 ## 目录结构
 
 ```
