@@ -66,6 +66,16 @@ bash restore.sh backups/app_db_dev_20260101_010000.sql.gz dev
 cd sync && bash sync.sh test prod
 ```
 
+## DBeaver / GUI 一键导入
+
+不想用命令行？`dbeaver/app_db_init.sql` 是一个**自包含、幂等**的单文件脚本，可在 DBeaver（或其他 SQL 客户端）中直接打开执行：
+
+1. （可选）在 `postgres` 连接上取消注释并执行文件末尾「附录A：建库与角色」来建库/建角色；
+2. 用 DBeaver 连接到 `app_db`；
+3. 打开 `dbeaver/app_db_init.sql` → 全选 → 工具栏「执行 SQL 脚本」。
+
+脚本内含扩展、表结构、索引、触发器与种子数据，使用 `IF NOT EXISTS` / `ON CONFLICT` 保证可重复执行。需要 `CREATE EXTENSION` 权限（默认管理员即可）。
+
 ## 核心表说明
 | 表 | 用途 | 对应功能 |
 | --- | --- | --- |
