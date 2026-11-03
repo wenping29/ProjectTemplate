@@ -45,10 +45,11 @@ builder.Services.AddScoped<ISystemConfigService, SystemConfigService>();
 
 builder.Services.AddControllers();
 
-// ---- CORS：允许本地前端直连（开发期推荐走 vite proxy /api，无需 CORS）----
+// ---- CORS：允许本地开发前端（vite 5173/5174、Flutter web 任意端口等直连）----
 const string CorsPolicy = "frontend";
 builder.Services.AddCors(opt => opt.AddPolicy(CorsPolicy, p => p
-    .WithOrigins("http://localhost:5173", "http://localhost:5174")
+    .SetIsOriginAllowed(origin =>
+        origin.StartsWith("http://localhost") || origin.StartsWith("http://127.0.0.1"))
     .AllowAnyHeader()
     .AllowAnyMethod()));
 builder.Services.AddEndpointsApiExplorer();
