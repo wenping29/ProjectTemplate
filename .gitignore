@@ -62,3 +62,8 @@ logs/
 /App/windows/
 /App/linux/
 /App/test/
+
+# tsc 编译产物（曾导致 vite 加载了旧版 vite.config.js 而代理失败）
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo
