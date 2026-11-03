@@ -1,0 +1,28 @@
+# 数据库配置 (Database Configuration)
+# 多环境连接配置，供 build/import/backup/sync 脚本读取。
+# 生产环境请通过环境变量或密钥管理覆盖，切勿提交真实密码。
+
+defaults: &defaults
+  host: localhost
+  port: 5432
+  database: app_db
+  username: app_rw
+  password: app_rw_pass
+  sslmode: prefer
+
+development:
+  <<: *defaults
+  database: app_db_dev
+
+test:
+  <<: *defaults
+  database: app_db_test
+  username: app_ro
+  password: app_ro_pass
+
+production:
+  <<: *defaults
+  database: app_db
+  username: app_rw
+  password: "${DB_PASSWORD}"   # 从环境变量注入
+  sslmode: require
