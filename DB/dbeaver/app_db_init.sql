@@ -1,21 +1,49 @@
 -- ============================================================
 -- app_db_init.sql  —  DBeaver 一键导入脚本 (PostgreSQL)
 -- ============================================================
--- 用途：在 DBeaver 的 SQL 编辑器中打开本文件，全选后「执行 SQL 脚本」
---      （工具栏 ▶  Execute SQL Script，或 Ctrl+A 后 Ctrl+Enter）。
+-- 重要：请使用「数据库所有者 / 超级用户（postgres）」身份连接后执行本脚本。
+--   ❌ 不要用 app_rw / app_ro / 普通业务账号执行，否则会报
+--      ERROR 42501: permission denied for schema public
+--   （PostgreSQL 15+ 默认仅库所有者可在 public 模式建对象）。
+--   连接方式：在 DBeaver 中新建/选择 postgres 连接 → 切换到 app_db
+--   → 打开本文件 → 全选 → 「执行 SQL 脚本」(Ctrl+A 后 Ctrl+Enter)。
 --
--- 前提步骤：
---   1) 若尚未建库，请在「postgres（或任意维护库）」连接上执行本文件末尾
---      「附录A：建库与角色」(已注释，取消注释后单独执行)。
---   2) 用 DBeaver 连接到目标库 app_db（建库后刷新即可看到）。
---   3) 打开本文件，全选执行即可完成：扩展 / 表结构 / 索引 / 种子数据。
+-- 本脚本为「单文件自包含」：
+--   - 自动创建并授权应用账号 app_rw(读写) / app_ro(只读)（幂等）；
+--   - 自动建库所需的扩展 / 表 / 索引 / 触发器 / 种子数据；
+--   - 结尾显式把全部表授权给 app_rw / app_ro，确保应用可访问。
+--   若 app_db 尚未创建，请先执行文件末尾「附录A：建库」（取消注释后单独执行）。
 --
 -- 说明：
---   - 本脚本幂等：含 IF NOT EXISTS / ON CONFLICT DO NOTHING，可重复执行。
---   - 依赖：需 superuser 或具备 CREATE EXTENSION 权限（uuid-ossp、pgcrypto）。
+--   - 幂等：含 IF NOT EXISTS / ON CONFLICT DO NOTHING / DROP TRIGGER IF EXISTS，可重复执行。
+--   - 依赖：需具备 CREATE EXTENSION 权限（uuid-ossp、pgcrypto），所有者身份天然满足。
 --   - 管理员默认账号：admin / Admin@123456（密码以 bcrypt 存入，由 pgcrypto 生成）。
---   - 请勿在 DBeaver 中开启「每句事务」导致 CREATE EXTENSION 失败；使用默认自动提交即可。
 -- ============================================================
+
+
+-- ---------- 0. 应用账号与权限预置（须以所有者身份执行） ----------
+-- 0.1 创建应用登录角色（若已存在则跳过）
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_rw') THEN
+        CREATE ROLE app_rw LOGIN PASSWORD 'app_rw_pass';
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_ro') THEN
+        CREATE ROLE app_ro LOGIN PASSWORD 'app_ro_pass';
+    END IF;
+END
+$$;
+
+-- 0.2 授权连接与模式使用/创建权限
+GRANT CONNECT ON DATABASE app_db TO app_rw, app_ro;
+GRANT USAGE, CREATE ON SCHEMA public TO app_rw;   -- 读写账号需要 CREATE 才能建表
+GRANT USAGE         ON SCHEMA public TO app_ro;   -- 只读账号仅需 USAGE
+
+-- 0.3 默认权限：本所有者此后新建的表自动对应用账号授权
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_rw;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT ON TABLES TO app_ro;
 
 
 -- ---------- 1. 扩展 ----------
@@ -236,8 +264,15 @@ WHERE NOT EXISTS (SELECT 1 FROM products)
 ON CONFLICT DO NOTHING;
 
 
+-- ---------- 6. 显式授权（覆盖本次新建及历史表，确保应用账号可访问） ----------
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES    IN SCHEMA public TO app_rw;
+GRANT SELECT                            ON ALL TABLES    IN SCHEMA public TO app_ro;
+GRANT USAGE,  SELECT                    ON ALL SEQUENCES IN SCHEMA public TO app_rw;
+GRANT SELECT                            ON ALL SEQUENCES IN SCHEMA public TO app_ro;
+
+
 -- ============================================================
--- 附录A：建库与角色（在 postgres 连接上执行，按需取消注释）
+-- 附录A：建库（若 app_db 尚不存在，先取消注释并在 postgres 维护连接上单独执行）
 -- ============================================================
 -- DO $$
 -- BEGIN
@@ -251,22 +286,3 @@ ON CONFLICT DO NOTHING;
 --   END IF;
 -- END
 -- $$;
---
--- DO $$
--- BEGIN
---   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_rw') THEN
---     CREATE ROLE app_rw LOGIN PASSWORD 'app_rw_pass';
---   END IF;
---   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_ro') THEN
---     CREATE ROLE app_ro LOGIN PASSWORD 'app_ro_pass';
---   END IF;
--- END
--- $$;
---
--- GRANT CONNECT ON DATABASE app_db TO app_rw, app_ro;
--- GRANT USAGE, CREATE ON SCHEMA public TO app_rw;
--- GRANT USAGE ON SCHEMA public TO app_ro;
--- ALTER DEFAULT PRIVILEGES IN SCHEMA public
---     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_rw;
--- ALTER DEFAULT PRIVILEGES IN SCHEMA public
---     GRANT SELECT ON TABLES TO app_ro;
