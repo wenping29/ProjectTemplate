@@ -1,9 +1,9 @@
-using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Server.Api.Common;
 using Server.Api.Data;
 using Server.Api.DTOs;
+using Server.Api.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -31,7 +31,7 @@ public class AuthService : IAuthService
     {
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == req.Username && u.DeletedAt == null);
         if (user is null || user.Status != 1) return null;
-        if (!BCrypt.Verify(req.Password, user.PasswordHash)) return null;
+        if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash)) return null;
 
         user.LastLoginAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
@@ -50,7 +50,7 @@ public class AuthService : IAuthService
         {
             Username = req.Username,
             Email = req.Email,
-            PasswordHash = BCrypt.HashPassword(req.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
             DisplayName = req.DisplayName,
             Phone = req.Phone,
             RoleId = role.Id,

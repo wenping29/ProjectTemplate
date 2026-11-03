@@ -1,4 +1,3 @@
-using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Server.Api.Data;
 using Server.Api.DTOs;
@@ -51,7 +50,7 @@ public class UserService : IUserService
             Phone = req.Phone,
             RoleId = req.RoleId,
             Status = req.Status,
-            PasswordHash = BCrypt.HashPassword(string.IsNullOrWhiteSpace(req.Password) ? "Pass@123" : req.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(string.IsNullOrWhiteSpace(req.Password) ? "Pass@123" : req.Password)
         };
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
@@ -70,7 +69,7 @@ public class UserService : IUserService
         user.RoleId = req.RoleId;
         user.Status = req.Status;
         if (!string.IsNullOrWhiteSpace(req.Password))
-            user.PasswordHash = BCrypt.HashPassword(req.Password);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password);
         await _db.SaveChangesAsync();
         return true;
     }

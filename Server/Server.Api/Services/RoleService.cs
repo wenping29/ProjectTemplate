@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Server.Api.Data;
 using Server.Api.DTOs;
+using Server.Api.Models;
 
 namespace Server.Api.Services;
 
