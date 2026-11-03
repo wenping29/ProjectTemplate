@@ -34,6 +34,22 @@ flutter create --project-name app . --org com.example   # 生成 android/ios 原
 flutter run
 ```
 
+## 常见问题 (Troubleshooting)
+
+- **`flutter run` 报 “Target of URI hasn't been found” / “The imported library … doesn't exist”**：
+  模板早期版本的子目录文件用了错误的相对导入路径（如 `lib/app/app.dart` 写成 `import 'providers/...'`）。
+  现已全部修正为 `../xxx`。请确保拿到最新文件，并在 `App/` 下重新执行 `flutter pub get`。
+- **`flutter run` 报找不到目标 / 无 `android/`、`ios/` 目录**：
+  模板只含 `lib/` 源码，**不含平台壳工程**。必须先用
+  `flutter create --project-name app . --org com.example` 生成原生工程，再 `flutter run`
+  （可用 `-d chrome` 跑 Web，或连接模拟器/真机）。
+- **`image_picker` 运行时崩溃（选图/拍照）**：
+  iOS 需在 `ios/Runner/Info.plist` 补全相册/相机权限描述；
+  Android 需在 `android/app/src/main/AndroidManifest.xml` 加相机与存储权限
+  （`flutter create` 生成的默认配置通常已含部分权限，按需补全）。
+- **本机未安装 Flutter SDK**：`flutter run` 会直接报 `command not found`。
+  请先安装 Flutter 并配置 `flutter doctor` 通过后再运行。
+
 ## 功能对应
 | 需求 | 实现位置 |
 | --- | --- |
