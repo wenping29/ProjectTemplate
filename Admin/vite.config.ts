@@ -13,8 +13,9 @@ export default defineConfig({
     proxy: {
       // 开发期将 /api 代理到 C# 服务端（见 Server/）
       '/api': {
-        target: 'https://localhost:5001',
+        target: 'http://localhost:5000',
         changeOrigin: true,
+        secure: false,
       },
     },
   },

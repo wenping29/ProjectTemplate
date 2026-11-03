@@ -44,6 +44,13 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ISystemConfigService, SystemConfigService>();
 
 builder.Services.AddControllers();
+
+// ---- CORS：允许本地前端直连（开发期推荐走 vite proxy /api，无需 CORS）----
+const string CorsPolicy = "frontend";
+builder.Services.AddCors(opt => opt.AddPolicy(CorsPolicy, p => p
+    .WithOrigins("http://localhost:5173", "http://localhost:5174")
+    .AllowAnyHeader()
+    .AllowAnyMethod()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -71,6 +78,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseCors(CorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
