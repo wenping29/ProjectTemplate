@@ -51,19 +51,31 @@ secrets.json
 logs/
 *.log
 
-/Admin/package-lock.json
-/Web/package-lock.json
-/Server/Server.Api/appsettings.Development.json
-/App/android/
-/App/ios/
-/App/build/
-/App/macos/
-/App/web/
-/App/windows/
-/App/linux/
-/App/test/
+Template/Admin/package-lock.json
+Template/Web/package-lock.json
+Template/Server/Server.Api/appsettings.Development.json
+Template/App/android/
+Template/App/ios/
+Template/App/build/
+Template/App/macos/
+Template/App/web/
+Template/App/windows/
+Template/App/linux/
+Template/App/test/
 
 # tsc 编译产物（曾导致 vite 加载了旧版 vite.config.js 而代理失败）
 vite.config.js
 vite.config.d.ts
 *.tsbuildinfo
+
+
+Flutter_App/App/android/
+Flutter_App/App/ios/
+Flutter_App/App/build/
+Flutter_App/App/macos/
+Flutter_App/App/web/
+Flutter_App/App/windows/
+Flutter_App/App/linux/
+Flutter_App/App/test/
+
+Flutter_App/Server/ChatServer.csproj

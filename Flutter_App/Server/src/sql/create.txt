@@ -1,0 +1,212 @@
+-- 创建数据库（字符集utf8mb4支持emoji）
+CREATE DATABASE IF NOT EXISTS chat_db 
+DEFAULT CHARACTER SET utf8mb4 
+DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE chat_db;
+
+-- 用户表
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    email VARCHAR(100) NOT NULL UNIQUE COMMENT '邮箱',
+    password VARCHAR(32) NOT NULL COMMENT '密码（MD5加密）',
+    avatar VARCHAR(200) COMMENT '头像URL',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    last_login_time DATETIME COMMENT '最后登录时间',
+    INDEX idx_email (email),
+    INDEX idx_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
+-- 聊天会话表
+CREATE TABLE IF NOT EXISTS chat_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(50) NOT NULL UNIQUE COMMENT '会话唯一标识',
+    user_id1 INT NOT NULL COMMENT '参与者1ID',
+    user_id2 INT NOT NULL COMMENT '参与者2ID（群聊为0）',
+    session_name VARCHAR(50) NOT NULL COMMENT '会话名称',
+    last_message VARCHAR(200) COMMENT '最后一条消息',
+    last_message_time DATETIME COMMENT '最后消息时间',
+    unread_count INT NOT NULL DEFAULT 0 COMMENT '未读消息数',
+    is_group BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否群聊',
+    INDEX idx_session_id (session_id),
+    INDEX idx_user1 (user_id1),
+    INDEX idx_user2 (user_id2)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='聊天会话表';
+
+-- 聊天消息表
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(50) NOT NULL COMMENT '关联会话ID',
+    sender_id INT NOT NULL COMMENT '发送者ID',
+    content TEXT NOT NULL COMMENT '消息内容',
+    send_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发送时间',
+    is_read BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否已读',
+    INDEX idx_session_id (session_id),
+    INDEX idx_sender_id (sender_id),
+    INDEX idx_send_time (send_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='聊天消息表';
+
+-- 初始化测试数据
+-- 测试用户（密码：123456，MD5加密后：e10adc3949ba59abbe56e057f20f883e）
+INSERT INTO users (username, email, password) 
+VALUES 
+('张三', 'zhangsan@test.com', 'e10adc3949ba59abbe56e057f20f883e'),
+('李四', 'lisi@test.com', 'e10adc3949ba59abbe56e057f20f883e');
+
+-- 测试会话
+INSERT INTO chat_sessions (session_id, user_id1, user_id2, session_name, last_message, last_message_time)
+VALUES 
+('1_2', 1, 2, '张三-李四', '这个周末一起去爬山吗？', NOW()),
+('group_1', 1, 0, '项目讨论组', '【公告】下周项目评审', NOW());
+
+-- 测试消息
+INSERT INTO chat_messages (session_id, sender_id, content, send_time)
+VALUES 
+('1_2', 2, '你好！', NOW() - INTERVAL 10 MINUTE),
+('1_2', 1, '在的，有什么事？', NOW() - INTERVAL 5 MINUTE),
+('1_2', 2, '这个周末一起去爬山吗？', NOW()),
+('group_1', 1, '各位，下周项目评审提前到周三了', NOW() - INTERVAL 1 HOUR);
+
+
+-- 创建收藏表（MySQL）
+CREATE TABLE IF NOT EXISTS `Collections` (
+  `Id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '收藏ID',
+  `UserId` INT NOT NULL COMMENT '用户ID（关联用户表）',
+  `Title` VARCHAR(200) NOT NULL COMMENT '收藏标题',
+  `Content` VARCHAR(500) DEFAULT '' COMMENT '收藏内容/链接',
+  `Type` VARCHAR(50) DEFAULT 'default' COMMENT '收藏类型（文章/工具/链接等）',
+  `CreateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '收藏时间',
+  -- 索引优化
+  INDEX `IX_Collections_UserId` (`UserId`) COMMENT '按用户ID索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户收藏表';
+
+
+-- 插入测试数据（兼容MySQL/SQL Server，仅时间函数有差异）
+-- ========== 用户ID=1（张三）的收藏 ==========
+INSERT INTO Collections (UserId, Title, Content, Type, CreateTime)
+VALUES 
+(1, '【教程】Flutter路由跳转最佳实践', 'https://example.com/flutter-route', 'article', 
+ -- MySQL 时间：
+ NOW() - INTERVAL 3 DAY
+ -- SQL Server 时间（替换上面行）：
+ -- DATEADD(DAY, -3, GETDATE())
+),
+(1, '【工具】JWT令牌生成工具', 'https://jwt.io/', 'tool', 
+ NOW() - INTERVAL 1 DAY
+ -- SQL Server：DATEADD(DAY, -1, GETDATE())
+),
+(1, '【文档】Dart语法速查表', 'https://dart.dev/cheatsheet', 'document', 
+ NOW() - INTERVAL 5 DAY
+ -- SQL Server：DATEADD(DAY, -5, GETDATE())
+);
+
+-- ========== 用户ID=2（李四）的收藏 ==========
+INSERT INTO Collections (UserId, Title, Content, Type, CreateTime)
+VALUES 
+(2, '【实战】C# WebAPI接口开发', 'https://example.com/csharp-webapi', 'article', 
+ NOW() - INTERVAL 2 DAY
+ -- SQL Server：DATEADD(DAY, -2, GETDATE())
+),
+(2, '【工具】Postman接口测试教程', 'https://learning.postman.com/', 'tool', 
+ NOW() - INTERVAL 4 DAY
+ -- SQL Server：DATEADD(DAY, -4, GETDATE())
+),
+(2, '【笔记】EF Core数据库迁移', 'EF Core迁移命令：Add-Migration/Update-Database', 'note', 
+ NOW() - INTERVAL 1 DAY
+ -- SQL Server：DATEADD(DAY, -1, GETDATE())
+);
+
+-- 创建好友关系表（MySQL）
+CREATE TABLE IF NOT EXISTS `Friends` (
+  `Id` INT AUTO_INCREMENT COMMENT '主键ID，自增',
+  `UserId` INT NOT NULL COMMENT '当前用户ID（谁的好友列表）',
+  `FriendUserId` INT NOT NULL COMMENT '好友的用户ID',
+  `RemarkName` VARCHAR(50) DEFAULT '' COMMENT '好友备注名',
+  `Status` TINYINT NOT NULL DEFAULT 1 COMMENT '好友状态：0-待验证，1-已通过，2-已拉黑',
+  `CreateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加好友时间',
+  -- 主键约束
+  PRIMARY KEY (`Id`),
+  -- 复合唯一索引：避免同一用户重复添加同一好友
+  UNIQUE KEY `UK_User_Friend` (`UserId`, `FriendUserId`),
+  -- 普通索引：优化查询效率
+  KEY `IX_Friend_Status` (`Status`),
+  KEY `IX_Friend_CreateTime` (`CreateTime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='好友关系表';
+
+
+-- 1. 插入用户表测试数据（若未存在）
+INSERT INTO Users (Id, Username, Avatar, Phone) VALUES
+(1, '张三', '/assets/avatar1.png', '13800138000'),
+(2, '李四', '/assets/avatar2.png', '13800138001'),
+(3, '王五', '/assets/avatar3.png', '13800138002');
+
+-- 2. 插入好友关系测试数据
+INSERT INTO Friends (UserId, FriendUserId, RemarkName, Status, CreateTime) VALUES
+-- 张三（ID=1）的好友：李四、王五
+(1, 2, '老李', 1, NOW() - INTERVAL 7 DAY),
+(1, 3, '老王', 1, NOW() - INTERVAL 3 DAY),
+-- 李四（ID=2）的好友：张三
+(2, 1, '小张', 1, NOW() - INTERVAL 7 DAY);
+
+
+-- 更新Users表测试数据（补充完整字段）
+UPDATE Users 
+SET 
+  Email = 'zhangsan@example.com',
+  Gender = 1,
+  RegisterTime = NOW() - INTERVAL 30 DAY,
+  LastLoginTime = NOW() - INTERVAL 1 HOUR
+WHERE Id = 1;
+
+UPDATE Users 
+SET 
+  Email = 'lisi@example.com',
+  Gender = 1,
+  RegisterTime = NOW() - INTERVAL 25 DAY,
+  LastLoginTime = NOW() - INTERVAL 2 HOUR
+WHERE Id = 2;
+
+-- 若Users表无数据，插入基础数据
+INSERT INTO Users (Id, Username, Avatar, Phone, Email, Gender, RegisterTime, LastLoginTime)
+VALUES 
+(1, '张三', '/assets/avatar1.png', '13800138000', 'zhangsan@example.com', 1, 
+ NOW() - INTERVAL 30 DAY, NOW() - INTERVAL 1 HOUR),
+(2, '李四', '/assets/avatar2.png', '13800138001', 'lisi@example.com', 1, 
+ NOW() - INTERVAL 25 DAY, NOW() - INTERVAL 2 HOUR);
+
+
+-- 创建朋友圈表（MySQL）
+CREATE TABLE IF NOT EXISTS `Moments` (
+  `Id` INT AUTO_INCREMENT COMMENT '朋友圈ID，自增主键',
+  `UserId` INT NOT NULL COMMENT '发布者用户ID（关联Users表）',
+  `Content` VARCHAR(500) NOT NULL COMMENT '朋友圈文字内容',
+  `Images` VARCHAR(1000) DEFAULT '[]' COMMENT '图片列表（JSON格式，如["url1","url2"]）',
+  `CreateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发布时间',
+  `LikeCount` INT NOT NULL DEFAULT 0 COMMENT '点赞数',
+  `CommentCount` INT NOT NULL DEFAULT 0 COMMENT '评论数',
+  `Visibility` TINYINT NOT NULL DEFAULT 1 COMMENT '可见范围：0-仅自己，1-好友可见，2-公开',
+  -- 主键约束
+  PRIMARY KEY (`Id`),
+  -- 索引优化（适配高频查询场景）
+  KEY `IX_Moments_UserId` (`UserId`) COMMENT '按发布者ID索引，优化个人朋友圈查询',
+  KEY `IX_Moments_CreateTime` (`CreateTime`) COMMENT '按发布时间索引，优化按时间排序',
+  KEY `IX_Moments_Visibility` (`Visibility`) COMMENT '按可见范围索引，优化权限筛选'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='朋友圈动态表';
+
+
+-- 插入朋友圈测试数据
+INSERT INTO Moments (UserId, Content, Images, CreateTime, LikeCount, CommentCount, Visibility)
+VALUES 
+-- 张三（ID=1）的朋友圈
+(1, '今天学习了Flutter和C# WebAPI，收获满满！', '["/assets/moment1.jpg","/assets/moment2.jpg"]', 
+ NOW() - INTERVAL 2 HOUR, 5, 2, 1),
+(1, '分享一个JWT令牌生成工具：https://jwt.io/', '[]', 
+ NOW() - INTERVAL 1 DAY, 3, 1, 2),
+-- 李四（ID=2）的朋友圈
+(2, '周末去爬山，风景超棒！', '["/assets/moment3.jpg"]', 
+ NOW() - INTERVAL 5 HOUR, 8, 3, 1),
+-- 王五（ID=3）的仅自己可见的朋友圈
+(3, '私人笔记：xxx', '[]', 
+ NOW() - INTERVAL 3 HOUR, 0, 0, 0);
+
