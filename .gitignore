@@ -79,3 +79,12 @@ Flutter_App/App/linux/
 Flutter_App/App/test/
 
 Flutter_App/Server/ChatServer.csproj
+
+
+
+**/node_modules/
+**/dist/
+
+**/bin/Debug/
+**/bin/Release/
+**/obj/
